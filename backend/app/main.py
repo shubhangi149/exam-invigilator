@@ -55,4 +55,4 @@ if __name__ == "__main__":
     if settings.MODE == "DEV":
         uvicorn.run("main:app", host=settings.HOST, port=settings.PORT, reload=True)
     else:
-        uvicorn.run("main:app", host='0.0.0.0', port=8000)
+        uvicorn.run("main:app", host='0.0.0.0', port=settings.PORT)

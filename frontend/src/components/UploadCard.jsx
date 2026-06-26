@@ -1,8 +1,10 @@
 import { UploadCloud, CheckCircle, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
-export default function UploadCard({ title, onFileChange }) {
+export default function UploadCard({ title, onFileChange, error }) {
     const [fileName, setFileName] = useState("");
+    const fileInputRef = useRef(null);
+    
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -14,19 +16,36 @@ export default function UploadCard({ title, onFileChange }) {
         setFileName(file.name);
         onFileChange(file);
     };
+    
     const clearFile = (e) => {
         e.preventDefault();
         e.stopPropagation();
         setFileName("");
         onFileChange(null);
+        // Reset the file input value so the same file can be selected again
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
     };
 
+    const handleLabelClick = (e) => {
+        // Only trigger file input if not clicking on remove button
+        if (e.target.closest('button')) return;
+        fileInputRef.current?.click();
+    };
 
     return (
         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
-            <h3 className="font-semibold text-lg text-slate-800 mb-2">{title}</h3>
+            <h3 className="font-semibold text-lg text-slate-800 mb-2">
+                {title} <span className="text-red-500">*</span>
+            </h3>
             <p className="text-sm text-slate-500 mb-5">JPG, PNG or PDF • Max 2 MB</p>
-            <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-8 cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition">
+            <div 
+                className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-8 cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition ${
+                    error ? 'border-red-500 bg-red-50' : 'border-slate-300'
+                }`}
+                onClick={handleLabelClick}
+            >
                 {
                     !fileName ? (
                         <>
@@ -63,12 +82,13 @@ export default function UploadCard({ title, onFileChange }) {
                 }
                 <input
                     type="file"
+                    ref={fileInputRef}
                     className="hidden"
                     accept=".jpg,.jpeg,.png,.pdf"
                     onChange={handleFileSelect}
                 />
-            </label>
-
+            </div>
+            {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
         </div>
     );
 }

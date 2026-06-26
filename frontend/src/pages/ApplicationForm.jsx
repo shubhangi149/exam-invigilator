@@ -10,6 +10,7 @@ import documents from "../data/documents";
 
 export default function ApplicationForm() {
     const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({});
 
     const [formData, setFormData] = useState({
         name: "",
@@ -33,13 +34,53 @@ export default function ApplicationForm() {
             ...formData,
             [e.target.name]: e.target.value
         });
+        // Clear error for this field when user starts typing
+        if (errors[e.target.name]) {
+            setErrors({
+                ...errors,
+                [e.target.name]: ""
+            });
+        }
     };
 
     const handleFileChange = (field, file) => {
         setFiles((prev) => ({ ...prev, [field]: file }));
+        // Clear error for this file field
+        if (errors[field]) {
+            setErrors({
+                ...errors,
+                [field]: ""
+            });
+        }
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        
+        // Check all text fields
+        if (!formData.name.trim()) newErrors.name = "Name is required";
+        if (!formData.mobile.trim()) newErrors.mobile = "Mobile number is required";
+        if (!formData.email.trim()) newErrors.email = "Email is required";
+        if (!formData.city.trim()) newErrors.city = "Preferred city is required";
+        if (!formData.current_city.trim()) newErrors.current_city = "Current city is required";
+        if (!formData.education.trim()) newErrors.education = "Education qualification is required";
+        if (!formData.dob.trim()) newErrors.dob = "Date of birth is required";
+        
+        // Check all file uploads
+        if (!files.aadhaar_front) newErrors.aadhaar_front = "Aadhaar front is required";
+        if (!files.aadhaar_back) newErrors.aadhaar_back = "Aadhaar back is required";
+        if (!files.pan_card) newErrors.pan_card = "PAN card is required";
+        if (!files.passport_photo) newErrors.passport_photo = "Passport photo is required";
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async () => {
+        if (!validateForm()) {
+            return;
+        }
+
         try {
             setLoading(true);
             const payload = new FormData();
@@ -55,13 +96,10 @@ export default function ApplicationForm() {
             payload.append("pan_card", files.pan_card);
             payload.append("passport_photo", files.passport_photo);
 
-            const response = await axios.post("http://localhost:5000/api/applications", payload, { headers: { "Content-Type": "multipart/form-data" } });
+            const response = await axios.post(`${domain}/api/applications`, payload, { headers: { "Content-Type": "multipart/form-data" } });
             alert("Application submitted successfully");
-        } catch (error) {
-            console.error(error);
-            alert(error?.response?.data?.detail || "Submission failed");
-        } finally {
-            setLoading(false);
+            
+            // Reset form after successful submission
             setFormData({
                 name: "",
                 mobile: "",
@@ -77,6 +115,12 @@ export default function ApplicationForm() {
                 pan_card: null,
                 passport_photo: null
             });
+            setErrors({});
+        } catch (error) {
+            console.error(error);
+            alert(error?.response?.data?.detail || "Submission failed");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -99,6 +143,8 @@ export default function ApplicationForm() {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
+                            error={errors.name}
+                            required
                         />
 
                         <InputField
@@ -106,6 +152,8 @@ export default function ApplicationForm() {
                             name="mobile"
                             value={formData.mobile}
                             onChange={handleChange}
+                            error={errors.mobile}
+                            required
                         />
 
                         <InputField
@@ -113,6 +161,8 @@ export default function ApplicationForm() {
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
+                            error={errors.email}
+                            required
                         />
 
                         <InputField
@@ -120,6 +170,8 @@ export default function ApplicationForm() {
                             name="city"
                             value={formData.city}
                             onChange={handleChange}
+                            error={errors.city}
+                            required
                         />
 
                         <InputField
@@ -127,6 +179,8 @@ export default function ApplicationForm() {
                             name="current_city"
                             value={formData.current_city}
                             onChange={handleChange}
+                            error={errors.current_city}
+                            required
                         />
 
                         <InputField
@@ -134,6 +188,8 @@ export default function ApplicationForm() {
                             name="education"
                             value={formData.education}
                             onChange={handleChange}
+                            error={errors.education}
+                            required
                         />
 
                         <InputField
@@ -143,6 +199,8 @@ export default function ApplicationForm() {
                             onChange={handleChange}
                             type="date"
                             max={new Date().toISOString().split("T")[0]}
+                            error={errors.dob}
+                            required
                         />
                     </div>
 
@@ -150,21 +208,29 @@ export default function ApplicationForm() {
                         <UploadCard
                             title="Aadhaar Front"
                             onFileChange={(file) => handleFileChange("aadhaar_front", file)}
+                            error={errors.aadhaar_front}
+                            required
                         />
 
                         <UploadCard
                             title="Aadhaar Back"
                             onFileChange={(file) => handleFileChange("aadhaar_back", file)}
+                            error={errors.aadhaar_back}
+                            required
                         />
 
                         <UploadCard
                             title="PAN Card"
                             onFileChange={(file) => handleFileChange("pan_card", file)}
+                            error={errors.pan_card}
+                            required
                         />
 
                         <UploadCard
                             title="Passport Photo"
                             onFileChange={(file) => handleFileChange("passport_photo", file)}
+                            error={errors.passport_photo}
+                            required
                         />
                     </div>
 

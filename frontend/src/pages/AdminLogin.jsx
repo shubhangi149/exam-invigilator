@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from "axios";
+import { domain } from '../data/constant';
 
 
 const AdminLogin = ({ onLoginSuccess }) => {
@@ -17,7 +18,7 @@ const AdminLogin = ({ onLoginSuccess }) => {
 
         try {
 
-            const response = await axios.post("http://localhost:5000/api/auth/login", {username, password});
+            const response = await axios.post(`${domain}/api/auth/login`, {username, password});
             const { access_token } = response.data;
             localStorage.setItem("access_token", access_token);
             localStorage.setItem("username", username);

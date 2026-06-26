@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Search, Trash2, FileSpreadsheet, Eye, ExternalLink } from "lucide-react";
 import * as XLSX from "xlsx";
+import { domain } from "../data/constant";
 
 export default function CandidateData() {
     const [search, setSearch] = useState("");
@@ -15,7 +16,7 @@ export default function CandidateData() {
 
             const token = localStorage.getItem("access_token");
             await axios.delete(
-                `http://localhost:5000/api/applications/${id}`,
+                `${domain}/api/applications/${id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -37,7 +38,7 @@ export default function CandidateData() {
             setLoading(true);
             const token = localStorage.getItem("access_token");
             const response = await axios.get(
-                "http://localhost:5000/api/applications",
+                `${domain}/api/applications`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
